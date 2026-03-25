@@ -20,6 +20,17 @@ const UPDATE_CALCULATED_VALUE = `
     WHERE id = $2
 `;
 
+const SELECT_AFFECTED_CALCULATIONS = `
+    SELECT id 
+    FROM calculations
+    WHERE expression ~ $1
+`;
+
+
+function variableRefSqlPattern(variableId) {
+  return `"id"\\s*:\\s*${variableId}([^0-9]|$)`;
+}
+
 const evaluateCalculation = async (pool, calculationId) => {
     const {rows} = await pool.query(SELECT_CALCULATION, [calculationId]);
     const calculation = rows[0];
@@ -88,9 +99,34 @@ const expressionToFormula = async (pool, expression) => {
     return {formula, variableId: ref.id, variableValue: value}
 }
 
+// Recalculation function
+const recalculate = async (pool, variableId) => {
+
+    // Regex to find variableId in JSON string
+    const pattern = variableRefSqlPattern(variableId);
+
+    // Query calculations table for all affected records when variable is updated
+    const {rows} = await pool.query(SELECT_AFFECTED_CALCULATIONS, [pattern]);
+
+    const results = [];
+    for(const row of rows){
+        const updatedCalculation = await evaluateCalculation(pool, row.id);
+        results.push(updatedCalculation)
+    }
+
+    return {
+        variableId,
+        updated: results.length,
+        results
+    }
+
+}
+
 
 
 module.exports = {
     evaluateCalculation,
-    expressionToFormula
+    expressionToFormula,
+    recalculate,
+    variableRefSqlPattern
 }
