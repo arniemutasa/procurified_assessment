@@ -3,6 +3,9 @@ const helmet = require("helmet");
 
 // Import routes
 const lineageRoutes = require("./routes/lineageRoutes");
+const calculationRoutes = require("./routes/calculationRoutes");
+
+
 const { notFound } = require("./middleware/notFound");
 const { errorHandler } = require("./middleware/errorHandler");
 
@@ -24,6 +27,7 @@ function createApp(){
     });
 
     app.use('/api/v1/lineage', lineageRoutes);
+    app.use('/api/v1/calculations', calculationRoutes);
 
     // Global middleware
     app.use(notFound);
