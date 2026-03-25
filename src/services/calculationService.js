@@ -27,8 +27,7 @@ const evaluateCalculation = async (pool, calculationId) => {
         throw new AppError('Calculation not found', 404);
     }
 
-    const {formula, variableId, variableValue} = await expressionToFormula(pool, calculation.expression);
-    console.log(formula, variableId, variableValue);
+    const {formula, variableId, variableValue} = await expressionToFormula(pool, calculation.expression)
 
 
     let calculated;
